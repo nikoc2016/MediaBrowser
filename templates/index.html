@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ current_folder }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='bootstrap.min.css') }}">
+    <script src="{{ url_for('static', filename='jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <style>
+        img, video {
+            width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-md bg-dark navbar-dark fixed-top">
+        <a class="navbar-brand" href="{{ url_for('render_path', subpath=current_path) }}">{{ current_folder }}</a>
+        <a class="navbar-brand" href="{{ url_for('render_path', subpath=parent_folder) }}">Back</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav">
+                {% for folder in subfolders %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('render_path', subpath=folder['path']) }}">{{ folder['name'] }}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container" style="margin-top:70px">
+    {% for file in files %}
+        <div class="card">
+            {% if file['type'] == 'dir' %}
+            <div class="card-body">
+                <a href="{{ url_for('render_path', subpath=file['path']) }}">
+                    <img class="lazy" data-src="{{ url_for('render_path', subpath=file['random_image']) }}" alt="{{ file['name'] }}">
+                    <noscript>
+                        <img src="{{ url_for('render_path', subpath=file['random_image']) }}" alt="{{ file['name'] }}">
+                    </noscript>
+                    <h5 class="card-title">{{ file['name'] }}</h5>
+                </a>
+            </div>
+            {% else %}
+                {% if file['type'] == 'image' %}
+                    <img class="lazy" data-src="{{ url_for('render_path', subpath=file['path']) }}" alt="{{ file['name'] }}">
+                    <noscript>
+                        <img src="{{ url_for('render_path', subpath=file['path']) }}" alt="{{ file['name'] }}">
+                    </noscript>
+                {% elif file['type'] == 'video' %}
+                    <video controls>
+                        <source src="{{ url_for('render_path', subpath=file['path']) }}" type="{{ file['mime'] }}">
+                    </video>
+                {% endif %}
+            {% endif %}
+        </div>
+    {% endfor %}
+    </div>
+</body>
+<script>
+    $(document).ready(function() {
+        function loadImages() {
+            $('.lazy').each(function() {
+                var img = $(this);
+                if (img.offset().top < $(window).scrollTop() + $(window).height() + 2000) {
+                    img.attr('src', img.data('src'));
+                    img.removeClass('lazy');
+                }
+            });
+        }
+
+        loadImages();
+        $(window).scroll(loadImages);
+    });
+</script>
+
+</html>
